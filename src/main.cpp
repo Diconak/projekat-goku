@@ -26,6 +26,8 @@ void processInput(GLFWwindow *window);
 
 unsigned int loadCubemap(vector<std::string> faces);
 
+unsigned int loadTexture(char const * path);
+
 // settings
 const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 600;
@@ -99,6 +101,7 @@ int main() {
     // -------------------------
     Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
     Shader skyboxShader("resources/shaders/skybox.vs", "resources/shaders/skybox.fs");
+    Shader travaShader("resources/shaders/trava.vs", "resources/shaders/trava.fs");
 
 
     float skyboxVertices[] = {
@@ -168,6 +171,55 @@ int main() {
 
     unsigned int cubemapTexture = loadCubemap(faces);
 
+    // kvadrat na kojem ce da stoji tekstura travke koja ce da se doda na ostrvo
+    float transparentVertices[] = {
+            // positions         // texture Coords (swapped y coordinates because texture is flipped upside down)
+            0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+            0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
+            1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+
+            0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
+            1.0f, -0.5f,  0.0f,  1.0f,  1.0f,
+            1.0f,  0.5f,  0.0f,  1.0f,  0.0f
+    };
+
+    //VAO i VBO za kocku koja ce da ima teksturu trave
+    unsigned int transparentVAO, transparentVBO;
+    glGenVertexArrays(1, &transparentVAO);
+    glGenBuffers(1, &transparentVBO);
+    glBindVertexArray(transparentVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, transparentVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(transparentVertices), transparentVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
+
+    stbi_set_flip_vertically_on_load(false);
+    unsigned int travaTexture = loadTexture(FileSystem::getPath("resources/textures/grass.png").c_str());
+
+    //Malo pozicije za travke
+    vector<glm::vec3> vegetation
+            {
+                    //centralno ostrvo
+                    glm::vec3(-2.5f,-0.4f,-1.7f),
+                    glm::vec3(-3.2f,-0.4f,-1.6f),
+                    glm::vec3(-3.2f,-0.4f,-2.0f),
+                    glm::vec3(-2.7f,-0.4f,-2.1f),
+
+                    //ostrvo pozadi
+                    glm::vec3(0.1f,-0.4f,-12.5f),
+                    glm::vec3(-0.5f,-0.4f,-12.4f),
+                    glm::vec3(-0.8f,-0.4f,-12.5f),
+
+                    //napred lepo
+                    glm::vec3(-7.1f,2.1f,5.4f),
+                    glm::vec3(-7.6f,2.1f,5.5f),
+                    glm::vec3(-7.5f,2.1f,5.0f),
+                    glm::vec3(-7.98f,2.1f,5.1f),
+            };
+
     // load models
     // -----------
     // u ucitana ostrva
@@ -227,7 +279,8 @@ int main() {
 
         //PRVO SE AKTIVIRA SEJDER
         ourShader.use();
-        //TODO dodaj osveljenja koja fale odnosno directional light
+        //TODO Dodaj ostala osvetljenja i sredi ovo direkciono svetlo da bi sredili ambijent slike
+        //TODO Smanji difuzno svetlo za objekte jer ne trebaju da se presijavaju
 
         //directional
         ourShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.0f);
@@ -255,7 +308,7 @@ int main() {
         ourShader.setMat4("view", view);
 
         //****************************************************************************************
-        // island one CENTAR, TODO add Trees maybe flowers and grass once you finish blending
+        // island one CENTAR
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model,glm::vec3(0.0f,-3.0f,0.0f));
         model = glm::scale(model, glm::vec3(0.5f,0.5f,0.5f));
@@ -297,7 +350,7 @@ int main() {
 
 
         //***********************************************************************
-        // island two POZADI, TODO add models
+        // island two POZADI
         model = glm::mat4(1.0f);
         model = glm::translate(model,glm::vec3(0.0f,-3.0f,-10.0f));
         model = glm::scale(model, glm::vec3(0.4f,0.5f,0.4f));
@@ -356,7 +409,7 @@ int main() {
         tulip.Draw(ourShader);
 
         //******************************************************************
-        // island three OSTRVO NAPRED LEVO, TODO add  grass once you finish blending
+        // island three OSTRVO NAPRED LEVO
         model = glm::mat4(1.0f);
         model = glm::translate(model,glm::vec3(-7.0f,-0.5f,7.0f));
         model = glm::scale(model, glm::vec3(0.4f,0.5f,0.4f));
@@ -410,7 +463,7 @@ int main() {
         tulip.Draw(ourShader);
 
         //***********************************************************
-        // island four OSTRVO NAPRED DESNO, TODO add flowers and grass once you finish blending
+        // island four OSTRVO NAPRED DESNO
         model = glm::mat4(1.0f);
         model = glm::translate(model,glm::vec3(7.0f,-5.5f,7.0f));
         model = glm::scale(model, glm::vec3(0.4f,0.5f,0.4f));
@@ -449,7 +502,23 @@ int main() {
         zbun1.Draw(ourShader);
 
         //**********************************************************************
+        //Palimo sejder i postavljamo travi
 
+        travaShader.use();
+        travaShader.setMat4("projection", projection);
+        travaShader.setMat4("view", view);
+
+        glBindVertexArray(transparentVAO);
+        glBindTexture(GL_TEXTURE_2D, travaTexture);
+        for (unsigned int i = 0; i < vegetation.size(); i++)
+        {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, vegetation[i]);
+            travaShader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+        }
+
+       //*************************************************************************
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
         skyboxShader.use();
@@ -471,8 +540,11 @@ int main() {
         glfwPollEvents();
     }
 
+    //brisanje array i buffera koje ne koristimo vise
     glDeleteVertexArrays(1, &skyboxVAO);
     glDeleteBuffers(1, &skyboxVAO);
+    glDeleteVertexArrays(1, &transparentVAO);
+    glDeleteBuffers(1, &transparentVBO);
 
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
@@ -559,3 +631,39 @@ unsigned int loadCubemap(vector<std::string> faces)
     return textureID;
 }
 
+unsigned int loadTexture(char const * path)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height, nrComponents;
+    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+        stbi_image_free(data);
+    }
+
+    return textureID;
+}
