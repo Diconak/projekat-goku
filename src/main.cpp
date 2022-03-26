@@ -97,13 +97,13 @@ int main() {
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
 
-    // build and compile shaders
+    // Ucitavamo sejdere
     // -------------------------
     Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
     Shader skyboxShader("resources/shaders/skybox.vs", "resources/shaders/skybox.fs");
     Shader travaShader("resources/shaders/trava.vs", "resources/shaders/trava.fs");
 
-
+//***********************************************************************************
     float skyboxVertices[] = {
             // positions
             -1.0f,  1.0f, -1.0f,
@@ -170,7 +170,7 @@ int main() {
             };
 
     unsigned int cubemapTexture = loadCubemap(faces);
-
+//******************************************************************************************
     // kvadrat na kojem ce da stoji tekstura travke koja ce da se doda na ostrvo
     float transparentVertices[] = {
             // positions         // texture Coords (swapped y coordinates because texture is flipped upside down)
@@ -219,6 +219,9 @@ int main() {
                     glm::vec3(-7.5f,2.1f,5.0f),
                     glm::vec3(-7.98f,2.1f,5.1f),
             };
+//**********************************************************************************
+
+  //*************************************************************************************
 
     // load models
     // -----------
@@ -233,16 +236,18 @@ int main() {
     drvo2.SetShaderTextureNamePrefix("material.");
 
     //ucitavamo cvece i zbunje
-    Model zbun1("resources/objects/Round_Box_Hedge/10453_Round_Box_Hedge_v1_Iteration3.obj"); //ostrvo1
+    Model zbun1("resources/objects/Round_Box_Hedge/10453_Round_Box_Hedge_v1_Iteration3.obj"); 
     zbun1.SetShaderTextureNamePrefix("material.");
-    Model tulip("resources/objects/tulip_flower/12978_tulip_flower_l3.obj"); //ostrvo1
+    Model tulip("resources/objects/tulip_flower/12978_tulip_flower_l3.obj");
     tulip.SetShaderTextureNamePrefix("material.");
 
     // ostalo
     Model bench("resources/objects/ConcreteBench/ConcreteBench-L3.obj"); //ostrvo1
     bench.SetShaderTextureNamePrefix("material.");
-    Model bird("resources/objects/Bird/12214_Bird_v1max_l3.obj"); //ostrvo1
+    Model bird("resources/objects/Bird/12214_Bird_v1max_l3.obj");
     bird.SetShaderTextureNamePrefix("material.");
+    Model lampion("resources/objects/svetlo1/streetlight.obj");
+    lampion.SetShaderTextureNamePrefix("material.");
 
 
     PointLight pointLight ;
@@ -286,7 +291,7 @@ int main() {
         ourShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.0f);
         ourShader.setVec3("dirLight.ambient", 0.2f, 0.2f, 0.2f);
         ourShader.setVec3("dirLight.diffuse", 0.2f, 0.2f, 0.2f);
-        ourShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+        ourShader.setVec3("dirLight.specular", 0.1f, 0.1f, 0.1f);
 
         // Pointlight
 
@@ -309,11 +314,19 @@ int main() {
 
         //****************************************************************************************
         // island one CENTAR
+
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model,glm::vec3(0.0f,-3.0f,0.0f));
         model = glm::scale(model, glm::vec3(0.5f,0.5f,0.5f));
         ourShader.setMat4("model", model);
         ostrvo1.Draw(ourShader);
+
+       // Lampion
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,glm::vec3(-1.2f,-0.95f,1.4f));
+        model = glm::scale(model, glm::vec3(1.2f,1.2f,1.2f));
+        ourShader.setMat4("model", model);
+        lampion.Draw(ourShader);
 
         // bench
         model = glm::mat4(1.0f);
@@ -363,6 +376,13 @@ int main() {
         model = glm::scale(model, glm::vec3(1.0f,1.0f,1.0f));
         ourShader.setMat4("model", model);
         drvo2.Draw(ourShader);
+
+        //Lampion
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,glm::vec3(-1.9f,-0.95f,-11.5f));
+        model = glm::scale(model, glm::vec3(1.0f,1.2f,1.2f));
+        ourShader.setMat4("model", model);
+        lampion.Draw(ourShader);
 
         //ptica desno
         model = glm::mat4(1.0f);
@@ -433,11 +453,18 @@ int main() {
 
         //  tulip dole
         model = glm::mat4(1.0f);
-        model = glm::translate(model,glm::vec3(-5.4f,1.5f,8.9f));
+        model = glm::translate(model,glm::vec3(-5.9f,1.5f,8.9f));
         model = glm::scale(model, glm::vec3(0.08f,0.08f,0.08f));
         model = glm::rotate(model, glm::radians((float) -90.0), glm::vec3(1.0f, 0.0f, 0.0f));
         ourShader.setMat4("model", model);
         tulip.Draw(ourShader);
+
+        //lampion
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,glm::vec3(-5.45f,1.55f,8.7f));
+        model = glm::scale(model, glm::vec3(1.2f,1.2f,1.2f));
+        ourShader.setMat4("model", model);
+        lampion.Draw(ourShader);
 
         //gornje drvo na ostrvu 3
         model = glm::mat4(1.0f);
@@ -501,6 +528,16 @@ int main() {
         ourShader.setMat4("model", model);
         zbun1.Draw(ourShader);
 
+        //lampion
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,glm::vec3(8.2f,-3.4f,8.8f));
+        model = glm::scale(model, glm::vec3(1.2f,1.2f,1.2f));
+        ourShader.setMat4("model", model);
+        lampion.Draw(ourShader);
+
+        //*************************************************************************
+        //Ucitavamo lebdece kocke
+
         //**********************************************************************
         //Palimo sejder i postavljamo travi
 
@@ -545,7 +582,8 @@ int main() {
     glDeleteBuffers(1, &skyboxVAO);
     glDeleteVertexArrays(1, &transparentVAO);
     glDeleteBuffers(1, &transparentVBO);
-
+//    glDeleteVertexArrays(1, &cubeVAO);
+//    glDeleteBuffers(1, &cubeVBO);
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
