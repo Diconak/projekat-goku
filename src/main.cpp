@@ -29,11 +29,11 @@ unsigned int loadCubemap(vector<std::string> faces);
 unsigned int loadTexture(char const * path);
 
 // settings
-const unsigned int SCR_WIDTH = 1200;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 800;
 
 // camera
-Camera camera(glm::vec3(5.0f, 10.0f, 15.0f));
+Camera camera(glm::vec3(7.0f, 12.0f, 22.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -41,18 +41,6 @@ bool firstMouse = true;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-
-struct PointLight {
-    glm::vec3 position;
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
-
-    float constant;
-    float linear;
-    float quadratic;
-};
-
 
 
 int main() {
@@ -236,7 +224,7 @@ int main() {
     drvo2.SetShaderTextureNamePrefix("material.");
 
     //ucitavamo cvece i zbunje
-    Model zbun1("resources/objects/Round_Box_Hedge/10453_Round_Box_Hedge_v1_Iteration3.obj"); 
+    Model zbun1("resources/objects/Round_Box_Hedge/10453_Round_Box_Hedge_v1_Iteration3.obj");
     zbun1.SetShaderTextureNamePrefix("material.");
     Model tulip("resources/objects/tulip_flower/12978_tulip_flower_l3.obj");
     tulip.SetShaderTextureNamePrefix("material.");
@@ -249,20 +237,11 @@ int main() {
     Model lampion("resources/objects/svetlo1/streetlight.obj");
     lampion.SetShaderTextureNamePrefix("material.");
 
-
-    PointLight pointLight ;
-    pointLight.position = glm::vec3(0.0f, 4.0, 0.0);
-    pointLight.ambient = glm::vec3(0.6, 0.6, 0.6);
-    pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
-    pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
-
-    pointLight.constant = 1.0f;
-    pointLight.linear = 0.09f;
-    pointLight.quadratic = 0.032f;
-
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
 
+    float lin = 0.09f;
+    float kvad = 0.032f;
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window)) {
@@ -284,25 +263,49 @@ int main() {
 
         //PRVO SE AKTIVIRA SEJDER
         ourShader.use();
-        //TODO Dodaj ostala osvetljenja i sredi ovo direkciono svetlo da bi sredili ambijent slike
-        //TODO Smanji difuzno svetlo za objekte jer ne trebaju da se presijavaju
 
         //directional
-        ourShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.0f);
-        ourShader.setVec3("dirLight.ambient", 0.2f, 0.2f, 0.2f);
+        ourShader.setVec3("dirLight.direction", -20.0f, 20.0f, -0.0f);
+        ourShader.setVec3("dirLight.ambient", 0.3f, 0.4f, 0.4f);
         ourShader.setVec3("dirLight.diffuse", 0.2f, 0.2f, 0.2f);
         ourShader.setVec3("dirLight.specular", 0.1f, 0.1f, 0.1f);
 
-        // Pointlight
+        // Pointlight's
+            //1
+        ourShader.setVec3("pointLight[0].position", glm::vec3(-1.2f,3.0f,1.4f));
+        ourShader.setVec3("pointLight[0].ambient", glm::vec3(0.2, 0.2, 0.2));
+        ourShader.setVec3("pointLight[0].diffuse", glm::vec3(0.8, 0.7, 0.7));
+        ourShader.setVec3("pointLight[0].specular", glm::vec3(0.2, 0.2, 0.2));
+        ourShader.setFloat("pointLight[0].constant", 1.0f);
+        ourShader.setFloat("pointLight[0].linear", lin);
+        ourShader.setFloat("pointLight[0].quadratic", kvad);
+            //2
+        ourShader.setVec3("pointLight[1].position", glm::vec3(-1.9f,3.0f,-11.5f));
+        ourShader.setVec3("pointLight[1].ambient", glm::vec3(0.2, 0.2, 0.2));
+        ourShader.setVec3("pointLight[1].diffuse", glm::vec3(0.8, 0.7, 0.7));
+        ourShader.setVec3("pointLight[1].specular", glm::vec3(0.2, 0.2, 0.2));
+        ourShader.setFloat("pointLight[1].constant", 1.0f);
+        ourShader.setFloat("pointLight[1].linear", lin);
+        ourShader.setFloat("pointLight[1].quadratic", kvad);
+            //3
+        ourShader.setVec3("pointLight[2].position", glm::vec3(-5.45f,5.0f,8.7f));
+        ourShader.setVec3("pointLight[2].ambient", glm::vec3(0.2, 0.2, 0.2));
+        ourShader.setVec3("pointLight[2].diffuse", glm::vec3(0.8, 0.7, 0.7));
+        ourShader.setVec3("pointLight[2].specular", glm::vec3(0.2, 0.2, 0.2));
+        ourShader.setFloat("pointLight[2].constant", 1.0f);
+        ourShader.setFloat("pointLight[2].linear", lin);
+        ourShader.setFloat("pointLight[2].quadratic", kvad);
+            //4
+        ourShader.setVec3("pointLight[3].position", glm::vec3(8.2f,0.4f,8.8f));
+        ourShader.setVec3("pointLight[3].ambient", glm::vec3(0.2, 0.2, 0.2));
+        ourShader.setVec3("pointLight[3].diffuse", glm::vec3(0.8, 0.7, 0.7));
+        ourShader.setVec3("pointLight[3].specular", glm::vec3(0.2, 0.2, 0.2));
+        ourShader.setFloat("pointLight[3].constant", 1.0f);
+        ourShader.setFloat("pointLight[3].linear", 0.09f);
+        ourShader.setFloat("pointLight[3].quadratic", 0.032f);
 
-        pointLight.position = glm::vec3(0.0, 4.0f, 0.0f);
-        ourShader.setVec3("pointLight.position", pointLight.position);
-        ourShader.setVec3("pointLight.ambient", pointLight.ambient);
-        ourShader.setVec3("pointLight.diffuse", pointLight.diffuse);
-        ourShader.setVec3("pointLight.specular", pointLight.specular);
-        ourShader.setFloat("pointLight.constant", pointLight.constant);
-        ourShader.setFloat("pointLight.linear", pointLight.linear);
-        ourShader.setFloat("pointLight.quadratic", pointLight.quadratic);
+
+
           ourShader.setVec3("viewPosition", camera.Position);
           ourShader.setFloat("material.shininess", 32.0f);
         // view/projection transformations

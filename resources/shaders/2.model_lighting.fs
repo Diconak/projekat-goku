@@ -27,12 +27,17 @@ struct Material {
 
     float shininess;
 };
+
+#define NR_POINT_LIGHT 4
+
 in vec2 TexCoords;
 in vec3 Normal;
 in vec3 FragPos;
 
+
+
 uniform DirLight dirLight;
-uniform PointLight pointLight;
+uniform PointLight pointLight[NR_POINT_LIGHT];
 uniform Material material;
 
 uniform vec3 viewPosition;
@@ -78,6 +83,7 @@ void main()
     vec3 normal = normalize(Normal);
     vec3 viewDir = normalize(viewPosition - FragPos);
     vec3 result = CalcDirLight(dirLight, normal, viewDir);
-    result += CalcPointLight(pointLight, normal, FragPos, viewDir);
+   for(int i = 0; i < NR_POINT_LIGHT; i++)
+           result += CalcPointLight(pointLight[i], normal, FragPos, viewDir);
     FragColor = vec4(result, 1.0);
 }
