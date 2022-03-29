@@ -1,5 +1,6 @@
 #version 330 core
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
 
 struct DirLight {
     vec3 direction;
@@ -33,8 +34,6 @@ struct Material {
 in vec2 TexCoords;
 in vec3 Normal;
 in vec3 FragPos;
-
-
 
 uniform DirLight dirLight;
 uniform PointLight pointLight[NR_POINT_LIGHT];
@@ -85,5 +84,10 @@ void main()
     vec3 result = CalcDirLight(dirLight, normal, viewDir);
    for(int i = 0; i < NR_POINT_LIGHT; i++)
            result += CalcPointLight(pointLight[i], normal, FragPos, viewDir);
+    float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
+    if(brightness > 1.0)
+            BrightColor = vec4(result, 1.0);
+        else
+            BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
     FragColor = vec4(result, 1.0);
 }
